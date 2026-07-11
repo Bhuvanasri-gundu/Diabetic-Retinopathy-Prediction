@@ -1,3 +1,5 @@
-/clinical_data.csv
-/processed_images/
-/clinical_data_processed.csv
+data/clinical_data.csv
+data/clinical_data_processed.csv
+processed_images/
+__pycache__/
+*.pyc
