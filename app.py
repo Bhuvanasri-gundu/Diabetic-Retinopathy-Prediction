@@ -522,7 +522,7 @@ def render_sidebar():
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
                 <span style="font-size:28px;"></span>
                 <span style="font-size:20px;font-weight:800;color:#5eead4;
-                  letter-spacing:-0.5px;">DR Vision AI</span>
+                  letter-spacing:-0.5px;">DR Vision</span>
             </div>
             <span style="font-size:11px;color:#94a3b8;">
                 Clinical Decision Support System
@@ -1036,7 +1036,7 @@ def page_analysis_report():
         st.markdown("""
         <div class="dr-card">
             <h4 style="color:#0f172a;font-size:14px;font-weight:700;margin-bottom:12px;">
-                DR Vision AI - Retinal Analysis Report
+                DR Vision- Retinal Analysis Report
             </h4>
         """, unsafe_allow_html=True)
 
@@ -1130,7 +1130,7 @@ def page_analysis_report():
     # Footer
     st.markdown("""
     <div class="app-footer">
-        © 2024 DR Vision AI. For Research Use Only.
+        © DR Vision. For Research Use Only.
         Not for diagnostic procedures without clinical oversight. &nbsp;&nbsp;&nbsp;
         <a href="#" style="color:#64748b;text-decoration:none;font-weight:600;">Privacy Policy</a>
         &nbsp;&nbsp;
@@ -1210,7 +1210,7 @@ def page_about():
             Next-Generation Retinal Analysis
         </h3>
         <p style="color:#64748b;font-size:13px;line-height:1.7;max-width:600px;">
-            DR Vision AI represents a pinnacle in computer-aided diagnostics for
+            DR Vision represents a pinnacle in computer-aided diagnostics for
             Diabetic Retinopathy. Our platform utilizes state-of-the-art Deep Learning
             models to provide clinicians with high-fidelity lesion detection and severity
             assessment, significantly reducing the cognitive load required for mass
@@ -1288,7 +1288,7 @@ def page_about():
     # Footer
     st.markdown("""
     <div class="app-footer">
-        © 2024 DR Vision AI. For Research Use Only.
+        © DR Vision. For Research Use Only.
     </div>
     """, unsafe_allow_html=True)
 
