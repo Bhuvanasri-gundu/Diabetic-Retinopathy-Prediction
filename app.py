@@ -405,8 +405,61 @@ def inject_css():
         padding: 8px 24px !important;
         transition: all 0.2s ease !important;
     }
+
+    /* Native file uploader styling only */
     div[data-testid="stFileUploader"] {
-        border-radius: 16px;
+        margin-bottom: 0 !important;
+        max-width: 320px;
+    }
+    div[data-testid="stFileUploader"] label[data-testid="stWidgetLabel"] {
+        display: none !important;
+    }
+    div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"] {
+        border: 2px solid #0D9488 !important;
+        border-radius: 12px !important;
+        background: #ffffff !important;
+        padding: 10px !important;
+        min-height: 58px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"]:hover {
+        border-color: #0F766E !important;
+        background: #F0FDFA !important;
+    }
+    div[data-testid="stFileUploader"] button {
+        background: #0D9488 !important;
+        color: #ffffff !important;
+        border: 1px solid #0D9488 !important;
+        border-radius: 10px !important;
+        padding: 10px 18px !important;
+        min-height: 48px !important;
+        font-weight: 700 !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    div[data-testid="stFileUploader"] button:hover {
+        background: #0F766E !important;
+        border-color: #0F766E !important;
+        color: #ffffff !important;
+    }
+    div[data-testid="stFileUploader"] button [data-testid="stIconMaterial"],
+    div[data-testid="stFileUploader"] button p,
+    div[data-testid="stFileUploader"] button div[data-testid="stMarkdownContainer"] {
+        display: none !important;
+    }
+    div[data-testid="stFileUploader"] button::before {
+        content: "Upload Image";
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"] {
+        display: none !important;
     }
 
     /* ── Analyze button ── */
@@ -466,6 +519,24 @@ def inject_css():
     }
     .feature-table tr:last-child td {
         border-bottom: none;
+    }
+                
+    /* -------- File Uploader -------- */
+
+    div[data-testid="stFileUploader"]{
+        margin-bottom:20px !important;
+    }
+
+    div[data-testid="stFileUploaderDropzone"]{
+        border:2px dashed #0D9488 !important;
+        border-radius:12px !important;
+        background:#ffffff !important;
+        padding:18px !important;
+    }
+
+    div[data-testid="stFileUploaderDropzone"]:hover{
+        border-color:#0F766E !important;
+        background:#F0FDFA !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -552,34 +623,6 @@ def render_sidebar():
                 st.rerun()
 
         st.markdown("---")
-
-        # System Status
-        if st.session_state.page == "Patient Analysis":
-            st.markdown("""
-            <div style="margin-top:8px;">
-                <p style="font-size:10px;font-weight:700;text-transform:uppercase;
-                  letter-spacing:1.5px;color:#94a3b8;margin-bottom:8px;">
-                  System Status
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            device_str = str(Config.DEVICE).upper()
-            st.markdown(f"""
-            <div style="background:rgba(255,255,255,0.05);border-radius:10px;
-              padding:12px;margin-bottom:12px;">
-                <div style="font-size:13px;font-weight:600;color:#e2e8f0;">
-                    AI Model v4.2
-                </div>
-                <div style="font-size:11px;color:#94a3b8;margin-top:4px;">
-                    Device: {device_str}
-                </div>
-                <div style="font-size:11px;color:#22c55e;margin-top:2px;">
-                    ● Online
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
 
 # ==============================================================
 # PAGE 1 — Dashboard
@@ -692,6 +735,15 @@ def page_patient_analysis():
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    uploaded_file = st.file_uploader(
+        "Upload Image",
+        type=["jpg", "jpeg", "png"],
+        key="image_uploader",
+        label_visibility="collapsed",
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
     # ─── Clinical Data Forms ───
     clinical_data = {}
 
@@ -788,6 +840,7 @@ def page_patient_analysis():
             progress = st.progress(0, text="Initializing...")
 
             try:
+                is_multimodal = st.session_state.get("model_type", "Multimodal") == "Multimodal"
                 # Step 1: Preprocess image
                 progress.progress(10, text="Preprocessing image...")
                 raw_pil, processed_pil, img_tensor = load_default_analysis_image()
