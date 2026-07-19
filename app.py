@@ -1,8 +1,7 @@
 """
-DR Vision AI — Streamlit Application
+DR Vision — Streamlit Application
 =====================================
-Production-ready Streamlit app for Diabetic Retinopathy screening.
-Run: streamlit run app.py
+Streamlit app for Diabetic Retinopathy screening.
 """
 
 import io
@@ -14,7 +13,7 @@ from PIL import Image
 
 # Must be the FIRST Streamlit command
 st.set_page_config(
-    page_title="DR Vision AI",
+    page_title="DR Vision",
     layout="wide",
     initial_sidebar_state="expanded",
 )
