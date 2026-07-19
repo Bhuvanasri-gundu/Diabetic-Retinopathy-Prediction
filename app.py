@@ -73,6 +73,10 @@ def inject_css():
     header {visibility: hidden;}
     .stDeployButton {display: none;}
     div[data-testid="stToolbar"] {display: none;}
+    .block-container {
+        padding-top: 0.75rem !important;
+        padding-bottom: 2rem !important;
+    }
 
     /* ── Sidebar ── */
     section[data-testid="stSidebar"] {
@@ -616,7 +620,7 @@ def render_sidebar():
             if st.button(
                 f"{icon}  {page_name}",
                 key=f"nav_{page_name}",
-                use_container_width=True,
+                width="stretch",
                 type="primary" if is_active else "secondary",
             ):
                 st.session_state.page = page_name
@@ -692,8 +696,12 @@ def page_dashboard():
     """, unsafe_allow_html=True)
 
 
-def load_default_analysis_image():
-    """Load a built-in sample retina image for analysis when no upload is required."""
+def load_default_analysis_image(uploaded_file=None):
+    """Load the uploaded image when available, otherwise fall back to a built-in sample."""
+    if uploaded_file is not None:
+        uploaded_file.seek(0)
+        return preprocess_uploaded_image(uploaded_file)
+
     sample_candidates = [
         os.path.join("processed_images", "0", "755_left-600.jpg"),
         os.path.join("processed_images", "0", "755_right-600.jpg"),
@@ -729,18 +737,47 @@ def page_patient_analysis():
     st.markdown("""
     <h2 style="font-weight:800;color:#0f172a;margin-bottom:4px;">Patient Retinal Analysis</h2>
     <p style="color:#64748b;font-size:13px;">
-        Start diagnostic screening with the built-in sample retinal image.
+        Upload a retinal fundus image and complete the patient's clinical information to begin AI-assisted diabetic retinopathy screening.
     </p>
     """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    uploaded_file = st.file_uploader(
-        "Upload Image",
-        type=["jpg", "jpeg", "png"],
-        key="image_uploader",
-        label_visibility="collapsed",
-    )
+    if "uploaded_file" not in st.session_state:
+        st.session_state.uploaded_file = None
+
+    uploaded_file = st.session_state.uploaded_file
+
+    if uploaded_file is None:
+        uploaded_file = st.file_uploader(
+            "Upload Image",
+            type=["jpg", "jpeg", "png"],
+            key="image_uploader",
+            label_visibility="collapsed",
+        )
+        if uploaded_file is not None:
+            st.session_state.uploaded_file = uploaded_file
+            st.session_state.uploaded_file_name = uploaded_file.name
+            st.rerun()
+    else:
+        st.markdown(
+            """
+            <div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:14px;padding:14px 16px;margin-bottom:16px;">
+                <div style="font-size:13px;font-weight:700;color:#115e59;margin-bottom:6px;">Uploaded Image</div>
+                <div style="font-size:12px;color:#0f766e;">{name}</div>
+            </div>
+            """.format(name=st.session_state.get("uploaded_file_name", uploaded_file.name)),
+            unsafe_allow_html=True,
+        )
+        st.image(
+            uploaded_file,
+            width="content",
+            caption="Uploaded image preview",
+        )
+        if st.button("Change Image", key="change_image_btn", width="content"):
+            st.session_state.uploaded_file = None
+            st.session_state.uploaded_file_name = None
+            st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -824,12 +861,12 @@ def page_patient_analysis():
     # ─── Action Buttons ───
     btn_col1, btn_col2 = st.columns([1, 2])
     with btn_col1:
-        st.button("Save as Draft", use_container_width=True, type="secondary")
+        st.button("Save as Draft", width="stretch", type="secondary")
     with btn_col2:
         st.markdown('<div class="analyze-btn">', unsafe_allow_html=True)
         analyze_clicked = st.button(
             "Analyze Patient",
-            use_container_width=True,
+            width="stretch",
             key="analyze_btn",
         )
         st.markdown('</div>', unsafe_allow_html=True)
@@ -843,7 +880,7 @@ def page_patient_analysis():
                 is_multimodal = st.session_state.get("model_type", "Multimodal") == "Multimodal"
                 # Step 1: Preprocess image
                 progress.progress(10, text="Preprocessing image...")
-                raw_pil, processed_pil, img_tensor = load_default_analysis_image()
+                raw_pil, processed_pil, img_tensor = load_default_analysis_image(uploaded_file)
 
                 # Step 2: Load models
                 progress.progress(30, text="Loading AI models...")
@@ -1097,7 +1134,7 @@ def page_analysis_report():
             st.image(
                 st.session_state.processed_pil,
                 caption="Preprocessed & Enhanced Retinal Scan",
-                use_container_width=True,
+                width="stretch",
             )
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1113,7 +1150,7 @@ def page_analysis_report():
             st.image(
                 st.session_state.gradcam_pil,
                 caption=f"Grad-CAM++ Saliency Map — Predicted: {grade_name} ({conf_pct:.1f}%)",
-                use_container_width=True,
+                width="stretch",
             )
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1154,7 +1191,7 @@ def page_analysis_report():
     # ─── Export PDF ───
     exp_col1, exp_col2 = st.columns([1, 1])
     with exp_col1:
-        if st.button(" Schedule Follow-up Appointment", use_container_width=True, type="primary"):
+        if st.button(" Schedule Follow-up Appointment", width="stretch", type="primary"):
             st.info(" Scheduling feature will be available in future updates.")
 
     with exp_col2:
@@ -1174,7 +1211,7 @@ def page_analysis_report():
                 data=pdf_bytes,
                 file_name=f"DR_Report_{grade_name.replace(' ', '_')}.pdf",
                 mime="application/pdf",
-                use_container_width=True,
+                width="stretch",
                 type="secondary",
             )
         else:
@@ -1263,11 +1300,12 @@ def page_about():
             Next-Generation Retinal Analysis
         </h3>
         <p style="color:#64748b;font-size:13px;line-height:1.7;max-width:600px;">
-            DR Vision represents a pinnacle in computer-aided diagnostics for
-            Diabetic Retinopathy. Our platform utilizes state-of-the-art Deep Learning
-            models to provide clinicians with high-fidelity lesion detection and severity
-            assessment, significantly reducing the cognitive load required for mass
-            screenings and longitudinal patient tracking.
+            DR Vision is an AI-powered clinical decision support system developed for the early detection 
+            and severity classification of Diabetic Retinopathy using retinal fundus images. 
+            The platform combines advanced deep learning techniques with clinical data analysis to provide 
+            accurate, explainable, and efficient screening results. By assisting healthcare professionals 
+            in identifying retinal abnormalities at an early stage, DR Vision aims to improve diagnostic accuracy, 
+            support timely intervention, and enhance patient outcomes.
         </p>
         <div style="display:flex;gap:12px;margin-top:20px;">
         </div>
